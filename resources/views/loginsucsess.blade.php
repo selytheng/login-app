@@ -4,117 +4,187 @@
     <title>Login Success</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-            text-align: center;
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #96e6a1, #d4fc79);
+        margin: 0;
+        padding: 20px;
+        text-align: center;
+        color: #333;
+    }
+
+    #welcomeMessage {
+        color: #28a745;
+        font-size: 28px;
+        margin-top: 30px;
+        margin-bottom: 20px;
+    }
+
+    button {
+        background-color: #28a745;
+        color: #fff;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 20px;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    button:hover {
+        background-color: #218838;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    #userList {
+        margin-top: 30px;
+        padding: 0 20px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 0 auto;
+        background-color: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+        border: none;
+        padding: 15px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #28a745;
+        color: white;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    tr:hover {
+        background-color: #e9ecef;
+    }
+
+    .action-buttons button {
+        background-color: #17a2b8;
+        border: none;
+        color: white;
+        padding: 8px 15px;
+        margin-top: 0px;
+        margin-right: 5px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .action-buttons button.delete {
+        background-color: #dc3545;
+    }
+
+    .action-buttons button:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.5);
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: 5% auto;
+        padding: 30px;
+        border: none;
+        width: 90%;
+        max-width: 500px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: modalFadeIn 0.3s;
         }
 
-        #welcomeMessage {
-            color: #333;
-            font-size: 24px;
-            margin-top: 20px;
-        }
-
-        button {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 20px;
-            border-radius: 5px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        #userList {
-            margin-top: 20px;
-            padding: 0 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 0 auto;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        tr:hover {
-            background-color: #ddd;
-        }
-
-        .action-buttons button {
-            background-color: #28a745;
-            border: none;
-            color: white;
-            padding: 5px 10px;
-            margin-right: 5px;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-
-        .action-buttons button.delete {
-            background-color: #dc3545;
-        }
-
-        .action-buttons button:hover {
-            opacity: 0.9;
-        }
-
-        /* Popup dialog styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 500px;
-            border-radius: 10px;
+        @keyframes modalFadeIn {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
         }
 
         .modal-header {
-            font-size: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #28a745;
+            font-size: 24px;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #28a745;
+        }
+
+        .modal-body form > div {
             margin-bottom: 15px;
         }
 
+        .modal-body label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .modal-body input,
+        .modal-body select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
         .modal-footer {
-            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
         }
 
         .modal-footer button {
-            margin-right: 10px;
+            margin-left: 10px;
         }
     </style>
 </head>
