@@ -100,7 +100,6 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'phone_number' => 'nullable|string|max:15|unique:users,phone_number,' . $user->id,
             'password' => 'nullable|string|min:6|confirmed',
             'role_id' => 'required|exists:roles,id',
         ]);
@@ -109,7 +108,7 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        $user->update($request->only(['name', 'email', 'phone_number', 'role_id']));
+        $user->update($request->only(['name', 'email', 'role_id']));
 
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);

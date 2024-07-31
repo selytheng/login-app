@@ -1,15 +1,22 @@
-*** HOW TO RUN ***
+# Laravel Project
 
-composer install
+## Overview
 
-cp .env.example .env
+This project is a Laravel-based application. Follow the instructions below to set up and run the application locally.
 
-php artisan jwt:secret
+## Prerequisites
 
-php artisan key:generate
+Make sure you have the following installed on your machine:
 
-php artisan storage:link
+-   PHP (version 8.0 or higher)
+-   Composer
+-   MySQL or another database server
+-   Node.js (for front-end dependencies, if applicable)
 
-php artisan migrate --seed
+## Setup Instructions
 
-php artisan serve 
+1. **Install Composer dependencies:**
+
+    ```bash
+    composer install
+    ```

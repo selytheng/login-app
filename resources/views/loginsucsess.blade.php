@@ -80,6 +80,42 @@
         .action-buttons button:hover {
             opacity: 0.9;
         }
+
+        /* Popup dialog styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 10px;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .modal-footer {
+            margin-top: 20px;
+        }
+
+        .modal-footer button {
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -89,7 +125,38 @@
         <!-- User table will be inserted here if role_id = 1 -->
     </div>
 
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                Edit User
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editUserId">
+                <label for="editUserName">Name:</label>
+                <input type="text" id="editUserName" required><br>
+                <label for="editUserEmail">Email:</label>
+                <input type="email" id="editUserEmail" required><br>
+                <label for="editUserRole">Role:</label>
+                <select id="editUserRole" required>
+                    <option value="1">admin</option>
+                    <option value="2">user</option>
+                </select><br>
+                <label for="editUserPassword">Password:</label>
+                <input type="password" id="editUserPassword"><br>
+                <label for="editUserPasswordConfirm">Confirm Password:</label>
+                <input type="password" id="editUserPasswordConfirm"><br>
+            </div>
+            <div class="modal-footer">
+                <button onclick="saveUser()">Save</button>
+                <button onclick="closeEditUserModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        let usersData = [];
+
         async function fetchUserDetails() {
             try {
                 const response = await fetch('/api/auth/me', {
@@ -132,13 +199,16 @@
                 });
 
                 const data = await response.json();
-                let table = '<table><tr><th>ID</th><th>Name</th><th>Email</th><th>Actions</th></tr>';
+                usersData = data; // Store the fetched user data in a global variable
+                let table = '<table><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr>';
 
                 data.forEach(user => {
+                    let role = user.role_id === 1 ? 'admin' : user.role_id === 2 ? 'user' : 'unknown';
                     table += `<tr>
                         <td>${user.id}</td>
                         <td>${user.name}</td>
                         <td>${user.email}</td>
+                        <td>${role}</td>
                         <td class="action-buttons">
                             <button onclick="editUser(${user.id})">Edit</button>
                             <button class="delete" onclick="deleteUser(${user.id})">Delete</button>
@@ -173,8 +243,57 @@
         }
 
         function editUser(userId) {
-            // Redirect to an edit page or open a modal to edit user details
-            window.location.href = `/editUser/${userId}`;
+            const user = usersData.find(user => user.id === userId);
+            if (user) {
+                document.getElementById('editUserId').value = user.id;
+                document.getElementById('editUserName').value = user.name;
+                document.getElementById('editUserEmail').value = user.email;
+                document.getElementById('editUserRole').value = user.role_id;
+                document.getElementById('editUserPassword').value = '';
+                document.getElementById('editUserPasswordConfirm').value = '';
+                document.getElementById('editUserModal').style.display = 'block';
+            }
+        }
+
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').style.display = 'none';
+        }
+
+        function saveUser() {
+            const userId = document.getElementById('editUserId').value;
+            const userName = document.getElementById('editUserName').value;
+            const userEmail = document.getElementById('editUserEmail').value;
+            const userRole = document.getElementById('editUserRole').value;
+            const userPassword = document.getElementById('editUserPassword').value;
+            const userPasswordConfirm = document.getElementById('editUserPasswordConfirm').value;
+
+            const userData = {
+                name: userName,
+                email: userEmail,
+                role_id: userRole,
+            };
+
+            if (userPassword) {
+                userData.password = userPassword;
+                userData.password_confirmation = userPasswordConfirm;
+            }
+
+            fetch(`/api/auth/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify(userData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('User updated successfully.');
+                closeEditUserModal();
+                fetchUsers(); // Refresh the user list
+            })
+            .catch(error => console.error('Error:', error));
         }
 
         function deleteUser(userId) {
