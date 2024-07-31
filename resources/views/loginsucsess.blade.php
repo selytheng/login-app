@@ -4,122 +4,131 @@
     <title>Login Success</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #96e6a1, #d4fc79);
-        margin: 0;
-        padding: 20px;
-        text-align: center;
-        color: #333;
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #96e6a1, #d4fc79);
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            color: #333;
+        }
 
-    #welcomeMessage {
-        color: #28a745;
-        font-size: 28px;
-        margin-top: 30px;
-        margin-bottom: 20px;
-    }
+        #welcomeMessage {
+            color: #28a745;
+            font-size: 28px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
 
-    button {
-        background-color: #28a745;
-        color: #fff;
-        border: none;
-        padding: 12px 24px;
-        font-size: 16px;
-        cursor: pointer;
-        margin-top: 20px;
-        border-radius: 30px;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
+        button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
 
-    button:hover {
-        background-color: #218838;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
+        button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
 
-    #userList {
-        margin-top: 30px;
-        padding: 0 20px;
-    }
+        #userList {
+            margin-top: 30px;
+            padding: 0 20px;
+        }
 
-    table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        margin: 0 auto;
-        background-color: #fff;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    }
+        table {
+            width: 700px;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
 
-    th, td {
-        border: none;
-        padding: 15px;
-        text-align: left;
-    }
+        th, td {
+            border: none;
+            padding: 15px;
+            text-align: left;
+        }
 
-    th {
-        background-color: #28a745;
-        color: white;
-        font-weight: bold;
-        text-transform: uppercase;
-    }
+        th {
+            background-color: #28a745;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
 
-    tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
+        th.actions-column,
+        td.actions-column {
+            width: 100px; /* Adjust this value as needed */
+        }
 
-    tr:hover {
-        background-color: #e9ecef;
-    }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
 
-    .action-buttons button {
-        background-color: #17a2b8;
-        border: none;
-        color: white;
-        padding: 8px 15px;
-        margin-top: 0px;
-        margin-right: 5px;
-        border-radius: 20px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
+        tr:hover {
+            background-color: #e9ecef;
+        }
 
-    .action-buttons button.delete {
-        background-color: #dc3545;
-    }
+        .action-buttons {
+            display: flex;
+            justify-content: space-around;
+        }
 
-    .action-buttons button:hover {
-        opacity: 0.9;
-        transform: translateY(-2px);
-    }
+        .action-buttons button {
+            background-color: #17a2b8;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            margin-top: 0px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
 
-    /* Modal Styles */
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgba(0,0,0,0.5);
-        backdrop-filter: blur(5px);
-    }
+        .action-buttons button.delete {
+            background-color: #dc3545;
+        }
 
-    .modal-content {
-        background-color: #fff;
-        margin: 5% auto;
-        padding: 30px;
-        border: none;
-        width: 90%;
-        max-width: 500px;
-        border-radius: 15px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        .action-buttons button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 30px;
+            border: none;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             animation: modalFadeIn 0.3s;
         }
 
@@ -275,8 +284,7 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    document.getElementById('welcomeMessage').textContent = 'Login successfully';
-
+                    document.getElementById('welcomeMessage').innerText = 'Welcome, ' + data.name + '! You are successfully logged in.';
                     if (data.role_id === 1) {
                         fetchUsers(); // Fetch users if role_id is 1
                     } else {
@@ -391,13 +399,30 @@
                 },
                 body: JSON.stringify(userData)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        // Handle specific validation errors here
+                        handleValidationErrors(errorData);
+                        throw new Error('Validation failed');
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 showPopup('User updated successfully.');
                 closeEditUserModal();
                 fetchUsers(); // Refresh the user list
             })
             .catch(error => console.error('Error:', error));
+        }
+
+        function handleValidationErrors(errorData) {
+            // Example handling for email errors
+            if (errorData.email && errorData.email.length > 0) {
+                showPopup(`Email Error: ${errorData.email.join(', ')}`);
+            }
+            // Handle other validation errors similarly
         }
 
         let userIdToDelete = null;
