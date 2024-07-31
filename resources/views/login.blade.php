@@ -139,7 +139,7 @@
 
                 if (response.ok) {
                     localStorage.setItem('access_token', data.access_token);
-                    window.location.href = '/loginsucsess';
+                    window.location.href = '/loginsuccess';
                 } else {
                     document.getElementById('responseMessage').textContent = data.message;
                 }
