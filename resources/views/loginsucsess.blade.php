@@ -186,6 +186,23 @@
         .modal-footer button {
             margin-left: 10px;
         }
+        .popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: fadeInOut 3s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            10%, 90% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -220,6 +237,23 @@
             <div class="modal-footer">
                 <button onclick="saveUser()">Save</button>
                 <button onclick="closeEditUserModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Confirm Deletion</h2>
+                <span class="close" onclick="closeDeleteConfirmModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this user?</p>
+            </div>
+            <div class="modal-footer">
+                <button onclick="confirmDelete()">Yes, Delete</button>
+                <button onclick="closeDeleteConfirmModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -359,16 +393,27 @@
             })
             .then(response => response.json())
             .then(data => {
-                alert('User updated successfully.');
+                showPopup('User updated successfully.');
                 closeEditUserModal();
                 fetchUsers(); // Refresh the user list
             })
             .catch(error => console.error('Error:', error));
         }
 
+        let userIdToDelete = null;
+
         function deleteUser(userId) {
-            if (confirm('Are you sure you want to delete this user?')) {
-                fetch(`/api/auth/${userId}`, {
+            userIdToDelete = userId;
+            document.getElementById('deleteConfirmModal').style.display = 'block';
+        }
+
+        function closeDeleteConfirmModal() {
+            document.getElementById('deleteConfirmModal').style.display = 'none';
+        }
+
+        function confirmDelete() {
+            if (userIdToDelete) {
+                fetch(`/api/auth/${userIdToDelete}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
@@ -378,11 +423,23 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    alert('User deleted successfully.');
+                    showPopup('User deleted successfully.');
                     fetchUsers(); // Refresh the user list
+                    closeDeleteConfirmModal();
                 })
                 .catch(error => console.error('Error:', error));
             }
+        }
+
+        function showPopup(message) {
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.textContent = message;
+            document.body.appendChild(popup);
+
+            setTimeout(() => {
+                popup.remove();
+            }, 3000);
         }
 
         document.addEventListener('DOMContentLoaded', fetchUserDetails);
