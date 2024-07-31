@@ -62,6 +62,24 @@
         tr:hover {
             background-color: #ddd;
         }
+
+        .action-buttons button {
+            background-color: #28a745;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            margin-right: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .action-buttons button.delete {
+            background-color: #dc3545;
+        }
+
+        .action-buttons button:hover {
+            opacity: 0.9;
+        }
     </style>
 </head>
 <body>
@@ -86,11 +104,12 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    if (data.role_id === 2) {
-                        document.getElementById('welcomeMessage').textContent = 'Login successfully';
-                    } else if (data.role_id === 1) {
-                        document.getElementById('welcomeMessage').textContent = 'Login successfully';
+                    document.getElementById('welcomeMessage').textContent = 'Login successfully';
+
+                    if (data.role_id === 1) {
                         fetchUsers(); // Fetch users if role_id is 1
+                    } else {
+                        document.getElementById('userList').style.display = 'none';
                     }
                 } else {
                     document.getElementById('welcomeMessage').textContent = 'Failed to load user details.';
@@ -113,10 +132,18 @@
                 });
 
                 const data = await response.json();
-                let table = '<table><tr><th>ID</th><th>Name</th><th>Email</th></tr>';
+                let table = '<table><tr><th>ID</th><th>Name</th><th>Email</th><th>Actions</th></tr>';
 
                 data.forEach(user => {
-                    table += `<tr><td>${user.id}</td><td>${user.name}</td><td>${user.email}</td></tr>`;
+                    table += `<tr>
+                        <td>${user.id}</td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td class="action-buttons">
+                            <button onclick="editUser(${user.id})">Edit</button>
+                            <button class="delete" onclick="deleteUser(${user.id})">Delete</button>
+                        </td>
+                    </tr>`;
                 });
 
                 table += '</table>';
@@ -143,6 +170,30 @@
                 window.location.href = '/signin';
             })
             .catch(error => console.error('Error:', error));
+        }
+
+        function editUser(userId) {
+            // Redirect to an edit page or open a modal to edit user details
+            window.location.href = `/editUser/${userId}`;
+        }
+
+        function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                fetch(`/api/auth/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert('User deleted successfully.');
+                    fetchUsers(); // Refresh the user list
+                })
+                .catch(error => console.error('Error:', error));
+            }
         }
 
         document.addEventListener('DOMContentLoaded', fetchUserDetails);
