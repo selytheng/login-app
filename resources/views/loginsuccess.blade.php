@@ -202,7 +202,7 @@
             background-color: #28a745;
             color: white;
             padding: 15px 20px;
-            border-radius: 5px;
+            border-radius: 30px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             z-index: 1000;
             animation: fadeInOut 3s ease-in-out;

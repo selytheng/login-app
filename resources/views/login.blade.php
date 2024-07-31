@@ -50,6 +50,10 @@
             border-color: #28a745;
         }
 
+        input.error {
+            border-color: #dc3545;
+        }
+
         button {
             background-color: #28a745;
             color: #fff;
@@ -76,8 +80,16 @@
             font-size: 14px;
         }
 
-        #userList {
-            margin-top: 20px;
+        .signup-link {
+            margin-top: 15px;
+            display: block;
+            color: #007bff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .signup-link:hover {
+            text-decoration: underline;
         }
 
         @media (max-width: 480px) {
@@ -109,12 +121,10 @@
             <input type="email" id="email" name="email" placeholder="Email" required>
             <input type="password" id="password" name="password" placeholder="Password" required>
             <button type="submit">Login</button>
+            <a href="/signup" class="signup-link">No account yet? Create one!</a>
         </form>
 
         <div id="responseMessage"></div>
-        <div id="userList" style="display: none;">
-            <!-- User table will be inserted here if role_id = 1 -->
-        </div>
     </div>
 
     <script>
@@ -124,6 +134,11 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            // Reset error styles
+            document.getElementById('email').classList.remove('error');
+            document.getElementById('password').classList.remove('error');
+            document.getElementById('responseMessage').textContent = '';
 
             try {
                 const response = await fetch('/api/auth/login', {
@@ -141,7 +156,9 @@
                     localStorage.setItem('access_token', data.access_token);
                     window.location.href = '/loginsuccess';
                 } else {
-                    document.getElementById('responseMessage').textContent = data.message;
+                    document.getElementById('responseMessage').textContent = 'The credentials you provided are incorrect! Please try again!';
+                    document.getElementById('email').classList.add('error');
+                    document.getElementById('password').classList.add('error');
                 }
             } catch (error) {
                 console.error('Error:', error);
