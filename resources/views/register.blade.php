@@ -229,6 +229,13 @@
             document.getElementById('email').classList.remove('error');
             document.getElementById('responseMessage').textContent = '';
 
+            if (password.length < 8 || c_password.length < 8) {
+                document.getElementById('responseMessage').textContent = 'The password must be at least 8 digits';
+                document.getElementById('password').classList.add('error');
+                document.getElementById('c_password').classList.add('error');
+                return;
+            }
+
             if (password !== c_password) {
                 document.getElementById('responseMessage').textContent = 'Confirm Password must be the same';
                 document.getElementById('password').classList.add('error');
@@ -243,7 +250,7 @@
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': csrfToken,
                     },
-                    body: JSON.stringify({ name, email, password, c_password, role_id: 2 }),
+                    body: JSON.stringify({ name, email, password, c_password}),
                 });
 
                 const data = await response.json();

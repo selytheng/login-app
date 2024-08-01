@@ -29,12 +29,11 @@ class AuthController extends Controller
                 'email'         => 'required|string|email|unique:users',
                 'password'      => 'required|min:8',
                 'c_password'    => 'required|same:password',
-                'role_id'       => 'required|integer'
             ]);
 
             $user = User::create([
                 'name'      => $registerUserData['name'],
-                'role_id'   => $registerUserData['role_id'],
+                'role_id'   => 2, // Static role_id
                 'email'     => $registerUserData['email'],
                 'password'  => Hash::make($registerUserData['password']),
                 'created_at'=> Carbon::now('Asia/Phnom_Penh'),
