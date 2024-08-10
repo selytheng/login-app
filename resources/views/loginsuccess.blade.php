@@ -212,6 +212,17 @@
             0%, 100% { opacity: 0; }
             10%, 90% { opacity: 1; }
         }
+
+        .deletebut {
+            background-color: #dc3545;
+        }
+        .confirmdeletion{
+            color: #dc3545;
+        }
+        .error {
+            border-color: red;
+        }
+
     </style>
 </head>
 <body>
@@ -254,14 +265,14 @@
     <div id="deleteConfirmModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Confirm Deletion</h2>
+                <h2 class="confirmdeletion">Confirm Deletion</h2>
                 <span class="close" onclick="closeDeleteConfirmModal()">&times;</span>
             </div>
             <div class="modal-body">
                 <p>Are you sure you want to delete this user?</p>
             </div>
             <div class="modal-footer">
-                <button onclick="confirmDelete()">Yes, Delete</button>
+                <button onclick="confirmDelete()" class="deletebut">Yes, Delete</button>
                 <button onclick="closeDeleteConfirmModal()">Cancel</button>
             </div>
         </div>
@@ -379,6 +390,25 @@
             const userPassword = document.getElementById('editUserPassword').value;
             const userPasswordConfirm = document.getElementById('editUserPasswordConfirm').value;
 
+            // Password validation
+            if (userPassword !== userPasswordConfirm) {
+                document.getElementById('editUserPassword').style.border = '1px solid red';
+                document.getElementById('editUserPasswordConfirm').style.border = '1px solid red';
+                showPopup("Confirm Password must be the same");
+                return; // Exit the function if passwords do not match
+            }
+
+            if (userPassword && userPassword.length < 8) {
+                document.getElementById('editUserPassword').style.border = '1px solid red';
+                document.getElementById('editUserPasswordConfirm').style.border = '1px solid red';
+                showPopup("The password must be at least 8 digits");
+                return; // Exit the function if password is less than 8 characters
+            }
+
+            // Reset border styles if validation passes
+            document.getElementById('editUserPassword').style.border = '';
+            document.getElementById('editUserPasswordConfirm').style.border = '';
+
             const userData = {
                 name: userName,
                 email: userEmail,
@@ -420,6 +450,7 @@
         function handleValidationErrors(errorData) {
             // Example handling for email errors
             if (errorData.email && errorData.email.length > 0) {
+                document.getElementById('editUserEmail').style.border = '1px solid red';
                 showPopup(`Email Error: ${errorData.email.join(', ')}`);
             }
             // Handle other validation errors similarly
