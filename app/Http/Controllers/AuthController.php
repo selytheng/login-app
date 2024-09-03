@@ -2,24 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Carbon\Carbon;
+use App\Models\User;
+use App\Mail\OtpMail;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\OtpMail;
-use Illuminate\Support\Facades\Cache;
 
 class AuthController extends Controller
 {
 
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register', 'verifyOtp']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'verifyOtp', 'resendOtp']]);
     }
 
 
@@ -104,6 +104,46 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'An error occurred: ' . $e->getMessage(),
             ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    public function resendOtp(Request $request)
+    {
+        try {
+            $request->validate([
+                'email' => 'required|string|email',
+            ]);
+
+            $cacheKey = 'register_' . $request->email;
+            $registerUserData = Cache::get($cacheKey);
+
+            if (!$registerUserData) {
+                return response()->json([
+                    'message' => 'No registration data found. Please register again.',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            $otp = mt_rand(100000, 999999); // Generate new 6-digit OTP
+            $registerUserData['otp'] = $otp;
+
+            // Update cache with new OTP
+            Cache::put($cacheKey, $registerUserData, 600); // Cache for another 10 minutes
+
+            // Send OTP email
+            Mail::to($request->email)->send(new OtpMail($otp));
+
+            return response()->json([
+                'message' => 'OTP has been resent to your email.',
+            ], Response::HTTP_OK);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], Response::HTTP_BAD_REQUEST);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Server Error',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

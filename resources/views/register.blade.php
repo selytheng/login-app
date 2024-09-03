@@ -232,6 +232,18 @@
             0%, 100% { opacity: 0; }
             10%, 90% { opacity: 1; }
         }
+        .resendotp-link {
+            margin-top: 15px;
+            display: block;
+            color: #007bff;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .resendotp-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -260,6 +272,7 @@
             </div>
             <input type="hidden" id="otp" name="otp">
             <button type="submit">Verify OTP</button>
+            <div class="resendotp-link" id="resendOtpButton">Resend OTP</div>
         </form>
 
         <div id="responseMessage"></div>
@@ -398,6 +411,34 @@
                 } else {
                     responseMessage.textContent = 'OTP verification failed. Please try again.';
                     highlightOtpError();
+                }
+            } catch (error) {
+                responseMessage.textContent = 'An error occurred. Please try again.';
+            }
+        });
+
+        //resend otp
+        const resendOtpButton = document.getElementById('resendOtpButton');
+
+        resendOtpButton.addEventListener('click', async function() {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            try {
+                const response = await fetch('/api/auth/resend-otp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                    body: JSON.stringify({ email: userEmail }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showPopup(data.message);
+                } else {
+                    responseMessage.textContent = data.message;
                 }
             } catch (error) {
                 responseMessage.textContent = 'An error occurred. Please try again.';
