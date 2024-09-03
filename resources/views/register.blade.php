@@ -193,7 +193,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Register</h1>
+        <h1 id="header1">Register</h1>
 
         <form id="registerForm">
             @csrf
@@ -282,6 +282,7 @@
                     responseMessage.textContent = data.message || 'Registration failed. Please try again.';
                     if (data.errors && data.errors.email) {
                         document.getElementById('email').classList.add('error');
+                        responseMessage.textContent = 'Email had been taken! try new one.';
                     }
                 }
             } catch (error) {
@@ -314,6 +315,9 @@
                     registerForm.reset();
                     otpForm.reset();
                     otpForm.style.display = 'none';
+                    document.getElementById('responseMessage').style.display = 'none';
+                    document.getElementById('header1').style.display = 'none';
+                    document.getElementById('successModal').classList.add('show');
                     // Store the access token if it's returned
                     if (data.access_token) {
                         localStorage.setItem('access_token', data.access_token);
