@@ -244,11 +244,35 @@
         .resendotp-link:hover {
             text-decoration: underline;
         }
+
+        .spinner {
+            display: none;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #28a745;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        button.loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1 id="header1">Register</h1>
+
+        <div id="spinner" class="spinner"></div>
 
         <form id="registerForm">
             @csrf
@@ -294,11 +318,13 @@
         const modal = document.getElementById("successModal");
         const modalMessage = document.getElementById("modalMessage");
         const span = document.getElementsByClassName("close")[0];
+        const spinner = document.getElementById('spinner');
         let userEmail = '';
 
         //register
         registerForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            showSpinner();
 
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
@@ -354,6 +380,7 @@
             } catch (error) {
                 responseMessage.textContent = 'An error occurred. Please try again.';
             }
+            hideSpinner();
         });
 
         //combined all otp1-opt6 together
@@ -383,6 +410,7 @@
         //otp verify
         otpForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            showSpinner();
 
             const otp = otpField.value;
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -415,12 +443,14 @@
             } catch (error) {
                 responseMessage.textContent = 'An error occurred. Please try again.';
             }
+            hideSpinner();
         });
 
         //resend otp
         const resendOtpButton = document.getElementById('resendOtpButton');
 
         resendOtpButton.addEventListener('click', async function() {
+            showSpinner();
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             try {
@@ -443,6 +473,7 @@
             } catch (error) {
                 responseMessage.textContent = 'An error occurred. Please try again.';
             }
+            hideSpinner();
         });
 
         //popup massage
@@ -455,6 +486,15 @@
             setTimeout(() => {
                 popup.remove();
             }, 3000);
+        }
+
+        // Function to show and hide spinner
+        function showSpinner() {
+            spinner.style.display = 'block';
+        }
+
+        function hideSpinner() {
+            spinner.style.display = 'none';
         }
 
         span.onclick = function() {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Mail\OtpMail;
+use App\Mail\WelcomeMail;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -92,6 +93,9 @@ class AuthController extends Controller
 
             // Clear cache data
             Cache::forget($cacheKey);
+
+            // Send welcome email
+            Mail::to($user->email)->send(new WelcomeMail($user));
 
             // Generate token
             $token = Auth::guard('api')->login($user);

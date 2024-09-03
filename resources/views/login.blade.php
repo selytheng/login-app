@@ -110,11 +110,36 @@
                 padding: 10px;
             }
         }
+        
+        /* Spinner Styles */
+        .spinner {
+            display: none;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #28a745;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        button.loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Login</h1>
+
+        <div id="spinner" class="spinner"></div>
 
         <form id="loginForm">
             @csrf
@@ -130,6 +155,7 @@
     <script>
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            showSpinner();
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -163,7 +189,16 @@
             } catch (error) {
                 console.error('Error:', error);
             }
+            hideSpinner();
         });
+        // Function to show and hide spinner
+        function showSpinner() {
+            spinner.style.display = 'block';
+        }
+
+        function hideSpinner() {
+            spinner.style.display = 'none';
+        }
     </script>
 </body>
 </html>
