@@ -231,7 +231,6 @@
         const modalMessage = document.getElementById("modalMessage");
         const span = document.getElementsByClassName("close")[0];
         let userEmail = '';
-        let accessToken = '';
 
         registerForm.addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -279,11 +278,10 @@
                     registerForm.style.display = 'none';
                     otpForm.style.display = 'block';
                     userEmail = email;
-                    accessToken = data.access_token; // Store the access token
                 } else {
                     responseMessage.textContent = data.message || 'Registration failed. Please try again.';
-                    if (data.message.includes('email')) {
-                        document.getElementId('email').classList.add('error');
+                    if (data.errors && data.errors.email) {
+                        document.getElementById('email').classList.add('error');
                     }
                 }
             } catch (error) {
@@ -318,7 +316,7 @@
                     otpForm.style.display = 'none';
                     // Store the access token if it's returned
                     if (data.access_token) {
-                        accessToken = data.access_token;
+                        localStorage.setItem('access_token', data.access_token);
                     }
                 } else {
                     responseMessage.textContent = data.message || 'OTP verification failed. Please try again.';

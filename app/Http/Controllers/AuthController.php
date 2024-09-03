@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OtpMail;
+use Illuminate\Support\Facades\Cache;
 
 class AuthController extends Controller
 {
@@ -35,9 +36,9 @@ class AuthController extends Controller
 
             $otp = mt_rand(100000, 999999); // Generate 6-digit OTP
 
-            // Temporarily store user data and OTP in session or cache
-            session()->put('registerUserData', array_merge($registerUserData, ['otp' => $otp]));
-            session()->put('otp', $otp);
+            // Store user data and OTP in cache
+            $cacheKey = 'register_' . $registerUserData['email'];
+            Cache::put($cacheKey, array_merge($registerUserData, ['otp' => $otp]), 600); // Cache for 10 minutes
 
             // Send OTP email
             Mail::to($registerUserData['email'])->send(new OtpMail($otp));
@@ -65,9 +66,8 @@ class AuthController extends Controller
                 'otp' => 'required|numeric',
             ]);
 
-            // Retrieve the stored data
-            $registerUserData = session()->get('registerUserData');
-            $storedOtp = session()->get('otp');
+            $cacheKey = 'register_' . $request->email;
+            $registerUserData = Cache::get($cacheKey);
 
             if (!$registerUserData) {
                 return response()->json([
@@ -75,13 +75,7 @@ class AuthController extends Controller
                 ], Response::HTTP_BAD_REQUEST);
             }
 
-            if ($registerUserData['email'] !== $request->email) {
-                return response()->json([
-                    'message' => 'Email does not match the registration data.',
-                ], Response::HTTP_BAD_REQUEST);
-            }
-
-            if ((string)$storedOtp !== (string)$request->otp) {
+            if ($registerUserData['otp'] !== (int)$request->otp) {
                 return response()->json([
                     'message' => 'Invalid OTP.',
                 ], Response::HTTP_BAD_REQUEST);
@@ -96,8 +90,8 @@ class AuthController extends Controller
                 'email_verified_at' => Carbon::now('Asia/Phnom_Penh'),
             ]);
 
-            // Clear session data
-            session()->forget(['registerUserData', 'otp']);
+            // Clear cache data
+            Cache::forget($cacheKey);
 
             // Generate token
             $token = Auth::guard('api')->login($user);
