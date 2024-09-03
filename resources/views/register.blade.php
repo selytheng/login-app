@@ -190,32 +190,6 @@
             display: none;
         }
 
-        #otp-container {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .otp-input {
-            width: 25px;
-            height: 50px;
-            font-size: 24px;
-            text-align: center;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            transition: border-color 0.3s ease;
-        }
-
-        .otp-input:focus {
-            outline: none;
-            border-color: #28a745;
-        }
-
-        .otp-input.error {
-            border-color: #dc3545;
-        }
         .popup {
             position: fixed;
             top: 20px;
@@ -286,15 +260,7 @@
 
         <form id="otpForm">
             @csrf
-            <div id="otp-container">
-                <input type="text" id="otp1" maxlength="1" class="otp-input" required>
-                <input type="text" id="otp2" maxlength="1" class="otp-input" required>
-                <input type="text" id="otp3" maxlength="1" class="otp-input" required>
-                <input type="text" id="otp4" maxlength="1" class="otp-input" required>
-                <input type="text" id="otp5" maxlength="1" class="otp-input" required>
-                <input type="text" id="otp6" maxlength="1" class="otp-input" required>
-            </div>
-            <input type="hidden" id="otp" name="otp">
+            <input type="text" id="otp" name="otp" placeholder="Enter OTP" required>
             <button type="submit">Verify OTP</button>
             <div class="resendotp-link" id="resendOtpButton">Resend OTP</div>
         </form>
@@ -383,36 +349,12 @@
             hideSpinner();
         });
 
-        //combined all otp1-opt6 together
-        const otpInputs = document.querySelectorAll('.otp-input');
-        const otpField = document.getElementById('otp');
-
-        otpInputs.forEach((input, index) => {
-            input.addEventListener('input', () => {
-                if (input.value.length === 1 && index < otpInputs.length - 1) {
-                    otpInputs[index + 1].focus();
-                }
-
-                let otp = '';
-                otpInputs.forEach(otpInput => {
-                    otp += otpInput.value;
-                });
-                otpField.value = otp;
-            });
-
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && input.value === '' && index > 0) {
-                    otpInputs[index - 1].focus();
-                }
-            });
-        });
-
         //otp verify
         otpForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             showSpinner();
 
-            const otp = otpField.value;
+            const otp = document.getElementById('otp').value;
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             try {

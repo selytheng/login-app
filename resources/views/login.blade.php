@@ -147,6 +147,7 @@
             <input type="password" id="password" name="password" placeholder="Password" required>
             <button type="submit">Login</button>
             <a href="/signup" class="signup-link">No account yet? Create one!</a>
+            <a href="/forgot-reset-password" class="signup-link">reset password</a>
         </form>
 
         <div id="responseMessage"></div>

@@ -20,7 +20,7 @@ class AuthController extends Controller
 
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register', 'verifyOtp', 'resendOtp']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'verifyOtp', 'resendOtp', 'sendResetOtp', 'verifyResetOtp', 'resetPassword']]);
     }
 
 
@@ -149,6 +149,64 @@ class AuthController extends Controller
                 'message' => 'Server Error',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    // Send OTP to email for password reset
+    public function sendResetOtp(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $otp = mt_rand(100000, 999999);
+        Cache::put('reset_password_' . $user->email, ['otp' => $otp], 600); // Cache for 10 minutes
+
+        // Send OTP email
+        Mail::to($user->email)->send(new OtpMail($otp));
+
+        return response()->json(['message' => 'OTP sent to your email.'], Response::HTTP_OK);
+    }
+
+    // Verify OTP for password reset
+    public function verifyResetOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required|numeric',
+        ]);
+
+        $cacheKey = 'reset_password_' . $request->email;
+        $data = Cache::get($cacheKey);
+
+        if (!$data || $data['otp'] !== (int)$request->otp) {
+            return response()->json(['message' => 'Invalid OTP.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        Cache::forget($cacheKey); // Clear OTP from cache
+
+        return response()->json(['message' => 'OTP verified successfully.'], Response::HTTP_OK);
+    }
+
+    // Update the password after OTP verification
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return response()->json(['message' => 'Password updated successfully.'], Response::HTTP_OK);
     }
 
     // Login

@@ -49,7 +49,7 @@
 <body>
     <div class="container">
         <h1>Your OTP Code</h1>
-        <p>Use the following OTP to complete your registration:</p>
+        <p>Use the following OTP to complete your verificatin:</p>
         <div class="otp-code">{{ $otp }}</div>
         <p>This OTP is valid for 10 minutes.</p>
     </div>

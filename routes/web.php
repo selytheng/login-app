@@ -14,4 +14,6 @@ Route::get('/signup', function () {
 Route::get('/loginsuccess', function () {
     return view('loginsuccess');
 });
-
+Route::get('/forgot-reset-password', function () {
+    return view('forgot-reset-password');
+});

@@ -19,4 +19,7 @@ Route::group([
     Route::post('/allUser', [AuthController::class, 'allUser'])->middleware('auth:api')->name('allUser')->middleware(Authorization::class . ':admin');
     Route::post('/verify', [AuthController::class, 'verifyOtp'])->name('verifyOtp');
     Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
+    Route::post('/forgot-password', [AuthController::class, 'sendResetOtp']);
+    Route::post('/verify-reset-otp', [AuthController::class, 'verifyResetOtp']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
