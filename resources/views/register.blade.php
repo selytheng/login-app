@@ -189,6 +189,33 @@
         #otpForm {
             display: none;
         }
+
+        #otp-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .otp-input {
+            width: 25px;
+            height: 50px;
+            font-size: 24px;
+            text-align: center;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s ease;
+        }
+
+        .otp-input:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+
+        .otp-input.error {
+            border-color: #dc3545;
+        }
         .popup {
             position: fixed;
             top: 20px;
@@ -223,7 +250,15 @@
 
         <form id="otpForm">
             @csrf
-            <input type="text" id="otp" name="otp" placeholder="Enter OTP" required>
+            <div id="otp-container">
+                <input type="text" id="otp1" maxlength="1" class="otp-input" required>
+                <input type="text" id="otp2" maxlength="1" class="otp-input" required>
+                <input type="text" id="otp3" maxlength="1" class="otp-input" required>
+                <input type="text" id="otp4" maxlength="1" class="otp-input" required>
+                <input type="text" id="otp5" maxlength="1" class="otp-input" required>
+                <input type="text" id="otp6" maxlength="1" class="otp-input" required>
+            </div>
+            <input type="hidden" id="otp" name="otp">
             <button type="submit">Verify OTP</button>
         </form>
 
@@ -248,6 +283,7 @@
         const span = document.getElementsByClassName("close")[0];
         let userEmail = '';
 
+        //register
         registerForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -263,6 +299,7 @@
             document.getElementById('email').classList.remove('error');
             responseMessage.textContent = '';
 
+            //check the password input
             if (password.length < 8 || c_password.length < 8) {
                 responseMessage.textContent = 'The password must be at least 8 digits';
                 document.getElementById('password').classList.add('error');
@@ -277,6 +314,7 @@
                 return;
             }
 
+            //register input
             try {
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
@@ -295,22 +333,45 @@
                     otpForm.style.display = 'block';
                     userEmail = email;
                 } else {
-                    responseMessage.textContent = data.message || 'Registration failed. Please try again.';
                     if (data.errors && data.errors.email) {
                         document.getElementById('email').classList.add('error');
                         responseMessage.textContent = 'Email had been taken! try new one.';
                     }
                 }
             } catch (error) {
-                console.error('Error:', error);
                 responseMessage.textContent = 'An error occurred. Please try again.';
             }
         });
 
+        //combined all otp1-opt6 together
+        const otpInputs = document.querySelectorAll('.otp-input');
+        const otpField = document.getElementById('otp');
+
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', () => {
+                if (input.value.length === 1 && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+
+                let otp = '';
+                otpInputs.forEach(otpInput => {
+                    otp += otpInput.value;
+                });
+                otpField.value = otp;
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && input.value === '' && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+        });
+
+        //otp verify
         otpForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const otp = document.getElementById('otp').value;
+            const otp = otpField.value;
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             try {
@@ -335,13 +396,25 @@
                     document.getElementById('header1').style.display = 'none';
                     document.getElementById('successModal').classList.add('show');
                 } else {
-                    responseMessage.textContent = data.message || 'OTP verification failed. Please try again.';
+                    responseMessage.textContent = 'OTP verification failed. Please try again.';
+                    highlightOtpError();
                 }
             } catch (error) {
-                console.error('Error:', error);
                 responseMessage.textContent = 'An error occurred. Please try again.';
             }
         });
+
+        //popup massage
+        function showPopup(message) {
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.textContent = message;
+            document.body.appendChild(popup);
+
+            setTimeout(() => {
+                popup.remove();
+            }, 3000);
+        }
 
         span.onclick = function() {
             modal.style.display = "none";
@@ -355,19 +428,15 @@
             }
         }
 
-        function showPopup(message) {
-            const popup = document.createElement('div');
-            popup.className = 'popup';
-            popup.textContent = message;
-            document.body.appendChild(popup);
-
-            setTimeout(() => {
-                popup.remove();
-            }, 3000);
-        }
-
         function redirectToSignIn() {
             window.location.href = '/signin';
+        }
+
+        // Function to add error class to all OTP inputs
+        function highlightOtpError() {
+            otpInputs.forEach(input => {
+                input.classList.add('error');
+            });
         }
     </script>
 </body>

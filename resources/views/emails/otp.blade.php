@@ -9,6 +9,11 @@
             font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #96e6a1, #d4fc79);
             color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
 
         .container {
@@ -16,7 +21,6 @@
             padding: 20px;
             border-radius: 10px;
             max-width: 600px;
-            margin: 20px auto;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
