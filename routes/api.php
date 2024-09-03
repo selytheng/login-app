@@ -17,5 +17,5 @@ Route::group([
     Route::put('/{id}', [AuthController::class, 'update'])->middleware('auth:api')->name('update')->middleware(Authorization::class . ':admin');
     Route::delete('/{id}', [AuthController::class, 'delete'])->middleware('auth:api')->name('delete')->middleware(Authorization::class . ':admin');
     Route::post('/allUser', [AuthController::class, 'allUser'])->middleware('auth:api')->name('allUser')->middleware(Authorization::class . ':admin');
+    Route::post('/verify', [AuthController::class, 'verifyOtp'])->name('verifyOtp');
 });
-

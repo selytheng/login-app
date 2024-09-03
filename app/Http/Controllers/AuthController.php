@@ -10,13 +10,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OtpMail;
 
 class AuthController extends Controller
 {
 
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'verifyOtp']]);
     }
 
 
@@ -31,29 +33,83 @@ class AuthController extends Controller
                 'c_password'    => 'required|same:password',
             ]);
 
-            $user = User::create([
-                'name'      => $registerUserData['name'],
-                'role_id'   => 2, // Static role_id
-                'email'     => $registerUserData['email'],
-                'password'  => Hash::make($registerUserData['password']),
-                'created_at'=> Carbon::now('Asia/Phnom_Penh'),
-                'updated_at'=> Carbon::now('Asia/Phnom_Penh'),
-            ]);
+            $otp = mt_rand(100000, 999999); // Generate 6-digit OTP
+
+            // Temporarily store user data and OTP in session or cache
+            session()->put('registerUserData', array_merge($registerUserData, ['otp' => $otp]));
+            session()->put('otp', $otp);
+
+            // Send OTP email
+            Mail::to($registerUserData['email'])->send(new OtpMail($otp));
 
             return response()->json([
-                'message' => 'User Created',
+                'message' => 'User data received. Please check your email for OTP verification.',
             ], Response::HTTP_CREATED);
         } catch (ValidationException $e) {
-            // Validation error
             return response()->json([
                 'message' => 'Validation Error',
                 'errors' => $e->errors(),
             ], Response::HTTP_BAD_REQUEST);
         } catch (\Exception $e) {
-            // Unexpected error
             return response()->json([
                 'message' => 'Server Error',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        try {
+            $request->validate([
+                'email' => 'required|email',
+                'otp' => 'required|numeric',
+            ]);
+
+            // Retrieve the stored data
+            $registerUserData = session()->get('registerUserData');
+            $storedOtp = session()->get('otp');
+
+            if (!$registerUserData) {
+                return response()->json([
+                    'message' => 'No registration data found. Please register again.',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            if ($registerUserData['email'] !== $request->email) {
+                return response()->json([
+                    'message' => 'Email does not match the registration data.',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            if ((string)$storedOtp !== (string)$request->otp) {
+                return response()->json([
+                    'message' => 'Invalid OTP.',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Create the user
+            $user = User::create([
+                'name'      => $registerUserData['name'],
+                'role_id'   => 2, // Static role_id
+                'email'     => $registerUserData['email'],
+                'password'  => Hash::make($registerUserData['password']),
+                'email_verified_at' => Carbon::now('Asia/Phnom_Penh'),
+            ]);
+
+            // Clear session data
+            session()->forget(['registerUserData', 'otp']);
+
+            // Generate token
+            $token = Auth::guard('api')->login($user);
+
+            return response()->json([
+                'message' => 'Email verified successfully',
+                'access_token' => $token,
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred: ' . $e->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
         }
     }
 

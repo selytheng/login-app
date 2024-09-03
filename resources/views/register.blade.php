@@ -107,7 +107,7 @@
             left: 0;
             top: 0;
             width: 100%; 
-            height: 200%; 
+            height: 100%; 
             overflow: auto; 
             background-color: rgb(0,0,0); 
             background-color: rgba(0,0,0,0.4); 
@@ -185,6 +185,10 @@
             display: block;
             opacity: 1;
         }
+
+        #otpForm {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -201,6 +205,12 @@
             <a href="/signin" class="back-link">Back</a>
         </form>
 
+        <form id="otpForm">
+            @csrf
+            <input type="text" id="otp" name="otp" placeholder="Enter OTP" required>
+            <button type="submit">Verify OTP</button>
+        </form>
+
         <div id="responseMessage"></div>
     </div>
 
@@ -208,13 +218,22 @@
     <div id="successModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <p>Registration successful!</p>
+            <p id="modalMessage">Registration successful!</p>
             <button class="modal-button" onclick="redirectToSignIn()">Back to sign-in page</button>
         </div>
     </div>
 
     <script>
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        const registerForm = document.getElementById('registerForm');
+        const otpForm = document.getElementById('otpForm');
+        const responseMessage = document.getElementById('responseMessage');
+        const modal = document.getElementById("successModal");
+        const modalMessage = document.getElementById("modalMessage");
+        const span = document.getElementsByClassName("close")[0];
+        let userEmail = '';
+        let accessToken = '';
+
+        registerForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const name = document.getElementById('name').value;
@@ -227,17 +246,17 @@
             document.getElementById('password').classList.remove('error');
             document.getElementById('c_password').classList.remove('error');
             document.getElementById('email').classList.remove('error');
-            document.getElementById('responseMessage').textContent = '';
+            responseMessage.textContent = '';
 
             if (password.length < 8 || c_password.length < 8) {
-                document.getElementById('responseMessage').textContent = 'The password must be at least 8 digits';
+                responseMessage.textContent = 'The password must be at least 8 digits';
                 document.getElementById('password').classList.add('error');
                 document.getElementById('c_password').classList.add('error');
                 return;
             }
 
             if (password !== c_password) {
-                document.getElementById('responseMessage').textContent = 'Confirm Password must be the same';
+                responseMessage.textContent = 'Confirm Password must be the same';
                 document.getElementById('password').classList.add('error');
                 document.getElementById('c_password').classList.add('error');
                 return;
@@ -250,38 +269,75 @@
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': csrfToken,
                     },
-                    body: JSON.stringify({ name, email, password, c_password}),
+                    body: JSON.stringify({ name, email, password, c_password }),
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    document.getElementById('responseMessage').style.display = 'none';
-                    document.getElementById('successModal').classList.add('show');
+                    responseMessage.textContent = data.message;
+                    registerForm.style.display = 'none';
+                    otpForm.style.display = 'block';
+                    userEmail = email;
+                    accessToken = data.access_token; // Store the access token
                 } else {
-                    document.getElementById('responseMessage').textContent = 'The email has already been taken. Please try a new one';
-                    document.getElementById('email').classList.add('error');
+                    responseMessage.textContent = data.message || 'Registration failed. Please try again.';
+                    if (data.message.includes('email')) {
+                        document.getElementId('email').classList.add('error');
+                    }
                 }
             } catch (error) {
                 console.error('Error:', error);
+                responseMessage.textContent = 'An error occurred. Please try again.';
             }
         });
 
-        // Get the modal
-        var modal = document.getElementById("successModal");
+        otpForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-        // Get the <span> element that closes the modal
-        var span = document.getElementsByClassName("close")[0];
+            const otp = document.getElementById('otp').value;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        // When the user clicks on <span> (x), close the modal
+            try {
+                const response = await fetch('/api/auth/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                    body: JSON.stringify({ otp, email: userEmail }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    modalMessage.textContent = 'OTP verified successfully!';
+                    modal.style.display = 'block';
+                    registerForm.reset();
+                    otpForm.reset();
+                    otpForm.style.display = 'none';
+                    // Store the access token if it's returned
+                    if (data.access_token) {
+                        accessToken = data.access_token;
+                    }
+                } else {
+                    responseMessage.textContent = data.message || 'OTP verification failed. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                responseMessage.textContent = 'An error occurred. Please try again.';
+            }
+        });
+
         span.onclick = function() {
-            modal.classList.remove('show');
+            modal.style.display = "none";
+            redirectToSignIn();
         }
 
-        // When the user clicks anywhere outside of the modal, close it
         window.onclick = function(event) {
             if (event.target == modal) {
-                modal.classList.remove('show');
+                modal.style.display = "none";
+                redirectToSignIn();
             }
         }
 
