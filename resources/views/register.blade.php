@@ -189,6 +189,22 @@
         #otpForm {
             display: none;
         }
+        .popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: fadeInOut 3s ease-in-out;
+        }
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            10%, 90% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -274,7 +290,7 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    responseMessage.textContent = data.message;
+                    showPopup(data.message);
                     registerForm.style.display = 'none';
                     otpForm.style.display = 'block';
                     userEmail = email;
@@ -310,7 +326,7 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    modalMessage.textContent = 'OTP verified successfully!';
+                    showPopup('OTP verified successfully!');
                     modal.style.display = 'block';
                     registerForm.reset();
                     otpForm.reset();
@@ -318,10 +334,6 @@
                     document.getElementById('responseMessage').style.display = 'none';
                     document.getElementById('header1').style.display = 'none';
                     document.getElementById('successModal').classList.add('show');
-                    // Store the access token if it's returned
-                    if (data.access_token) {
-                        localStorage.setItem('access_token', data.access_token);
-                    }
                 } else {
                     responseMessage.textContent = data.message || 'OTP verification failed. Please try again.';
                 }
@@ -341,6 +353,17 @@
                 modal.style.display = "none";
                 redirectToSignIn();
             }
+        }
+
+        function showPopup(message) {
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.textContent = message;
+            document.body.appendChild(popup);
+
+            setTimeout(() => {
+                popup.remove();
+            }, 3000);
         }
 
         function redirectToSignIn() {
