@@ -222,12 +222,42 @@
         .error {
             border-color: red;
         }
+        .delete-account {
+            background-color: #dc3545;
+            margin-left: 10px;
+        }
+
+        .delete-account:hover {
+            background-color: #c82333;
+        }
+
+        #deleteAccountModal .modal-content {
+            max-width: 400px;
+        }
+
+        #deleteAccountModal .modal-body {
+            text-align: left;
+        }
+
+        #deleteAccountModal .modal-body p {
+            margin-bottom: 10px;
+        }
+
+        .delete-account {
+            background-color: #dc3545;
+            margin-left: 10px;
+        }
+
+        .delete-account:hover {
+            background-color: #c82333;
+        }
 
     </style>
 </head>
 <body>
     <h1 id="welcomeMessage">Loading...</h1>
     <button onclick="logout()">Logout</button>
+    <button onclick="selfDelete()" class="delete-account">Delete my account</button>
     <div id="userList" style="display: none;">
         <!-- User table will be inserted here if role_id = 1 -->
     </div>
@@ -274,6 +304,24 @@
             <div class="modal-footer">
                 <button onclick="confirmDelete()" class="deletebut">Yes, Delete</button>
                 <button onclick="closeDeleteConfirmModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Account Confirmation Modal -->
+    <div id="deleteAccountModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="confirmdeletion">Delete Account</h2>
+                <span class="close" onclick="closeDeleteAccountModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+                <p>All your data will be permanently removed from our system.</p>
+            </div>
+            <div class="modal-footer">
+                <button onclick="confirmSelfDelete()" class="deletebut">Yes, Delete My Account</button>
+                <button onclick="closeDeleteAccountModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -498,6 +546,38 @@
             }, 3000);
         }
 
+        function selfDelete() {
+            document.getElementById('deleteAccountModal').style.display = 'block';
+        }
+
+        function closeDeleteAccountModal() {
+            document.getElementById('deleteAccountModal').style.display = 'none';
+        }
+
+        function confirmSelfDelete() {
+            fetch('/api/auth/selfdelete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('access_token'),
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                localStorage.removeItem('access_token');
+                showPopup(data.message);
+                closeDeleteAccountModal();
+                setTimeout(() => {
+                    window.location.href = '/signin';
+                }, 3000);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showPopup('An error occurred while deleting your account.');
+                closeDeleteAccountModal();
+            });
+        }
         document.addEventListener('DOMContentLoaded', fetchUserDetails);
     </script>
 </body>

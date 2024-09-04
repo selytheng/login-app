@@ -22,4 +22,5 @@ Route::group([
     Route::post('/forgot-password', [AuthController::class, 'sendResetOtp']);
     Route::post('/verify-reset-otp', [AuthController::class, 'verifyResetOtp']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+    Route::post('/selfdelete', [AuthController::class, 'selfDelete'])->middleware('auth:api');
 });

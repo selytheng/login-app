@@ -34,7 +34,7 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        input[type="email"], input[type="password"], input[type="number"] {
+        input[type="email"], input[type="password"], input[type="text"] {
             width: 100%;
             padding: 12px;
             margin: 10px 0;
@@ -45,7 +45,7 @@
             transition: border-color 0.3s ease;
         }
 
-        input[type="email"]:focus, input[type="password"]:focus, input[type="number"]:focus {
+        input[type="email"]:focus, input[type="password"]:focus, input[type="text"]:focus {
             outline: none;
             border-color: #28a745;
         }
@@ -101,7 +101,7 @@
                 padding: 20px;
             }
 
-            input[type="email"], input[type="password"], input[type="number"] {
+            input[type="email"], input[type="password"], input[type="text"] {
                 font-size: 14px;
             }
 
@@ -133,6 +133,18 @@
             pointer-events: none;
             opacity: 0.7;
         }
+        .back-link {
+            margin-top: 15px;
+            display: block;
+            color: #007bff;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -146,13 +158,15 @@
             <input type="email" id="email" name="email" placeholder="Email" required>
             <button type="submit">Send OTP</button>
             <div id="responseMessage"></div>
+            <a href="/signin" class="back-link">Back</a>
         </form>
 
         <!-- OTP Verification Form -->
         <form id="verifyOtpForm" style="display: none;">
-            <input type="number" id="otp" name="otp" placeholder="OTP" required>
+            <input type="text" id="otp" name="otp" placeholder="OTP" required>
             <button type="submit">Verify OTP</button>
             <div id="responseMessageOtp"></div>
+            <a id="backToForgotPassword" class="back-link">Back</a>
         </form>
 
         <!-- Reset Password Form -->
@@ -259,6 +273,15 @@
                 console.error('Error:', error);
             }
             hideSpinner();
+        });
+
+        //back to first form
+        document.getElementById('backToForgotPassword').addEventListener('click', function() {
+            document.getElementById('verifyOtpForm').style.display = 'none';
+            document.getElementById('forgotPasswordForm').style.display = 'block';
+            document.getElementById('formTitle').textContent = 'Forgot Password';
+            document.getElementById('responseMessage').textContent = '';
+            document.getElementById('email').value = '';
         });
 
         // Function to show and hide spinner

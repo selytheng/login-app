@@ -322,6 +322,25 @@ class AuthController extends Controller
         }
     }
 
+    public function selfDelete()
+    {
+        try {
+            $user = Auth::guard('api')->user();
+            if (!$user) {
+                return response()->json(['message' => 'User not found.'], Response::HTTP_NOT_FOUND);
+            }
+            
+            $user->delete();
+            Auth::guard('api')->logout();
+            
+            return response()->json(['message' => 'Your account has been successfully deleted.'], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while deleting your account.',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public function refresh()
     {
         // When access token will be expired, we are going to generate a new one wit this function 
