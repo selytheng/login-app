@@ -145,6 +145,12 @@
         .back-link:hover {
             text-decoration: underline;
         }
+
+        #responseMessage, #responseMessageOtp, #responseMessageReset{
+            color: #dc3545;
+            margin-top: 15px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -234,8 +240,11 @@
                     document.getElementById('verifyOtpForm').style.display = 'none';
                     document.getElementById('resetPasswordForm').style.display = 'block';
                     document.getElementById('formTitle').textContent = 'Reset Password';
+                    document.getElementById('otp').classList.remove('error'); // Remove error class if it was there
                 } else {
                     document.getElementById('responseMessageOtp').textContent = data.message;
+                    document.getElementById('otp').classList.add('error'); // Add error class
+                    hideSpinner();
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -251,6 +260,28 @@
             const password = document.getElementById('password').value;
             const password_confirmation = document.getElementById('password_confirmation').value;
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const responseMessage = document.getElementById('responseMessageReset');
+
+            // Reset error classes
+            document.getElementById('password').classList.remove('error');
+            document.getElementById('password_confirmation').classList.remove('error');
+
+            //check the password input
+            if (password.length < 8 || password_confirmation.length < 8) {
+                responseMessage.textContent = 'The password must be at least 8 digits';
+                document.getElementById('password').classList.add('error');
+                document.getElementById('password_confirmation').classList.add('error');
+                hideSpinner();
+                return;
+            }
+
+            if (password !== password_confirmation) {
+                responseMessage.textContent = 'Confirm Password must be the same';
+                document.getElementById('password').classList.add('error');
+                document.getElementById('password_confirmation').classList.add('error');
+                hideSpinner();
+                return;
+            }
 
             try {
                 const response = await fetch('/api/auth/reset-password', {
@@ -267,7 +298,8 @@
                 if (response.ok) {
                     window.location.href = '/signin'; // Redirect to login page
                 } else {
-                    document.getElementById('responseMessageReset').textContent = data.message;
+                    responseMessage.textContent = data.message;
+                    hideSpinner();
                 }
             } catch (error) {
                 console.error('Error:', error);

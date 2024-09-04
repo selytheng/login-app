@@ -309,6 +309,7 @@
                 responseMessage.textContent = 'The password must be at least 8 digits';
                 document.getElementById('password').classList.add('error');
                 document.getElementById('c_password').classList.add('error');
+                hideSpinner();
                 return;
             }
 
@@ -316,6 +317,7 @@
                 responseMessage.textContent = 'Confirm Password must be the same';
                 document.getElementById('password').classList.add('error');
                 document.getElementById('c_password').classList.add('error');
+                hideSpinner();
                 return;
             }
 
@@ -341,6 +343,7 @@
                     if (data.errors && data.errors.email) {
                         document.getElementById('email').classList.add('error');
                         responseMessage.textContent = 'Email had been taken! try new one.';
+                        hideSpinner();
                     }
                 }
             } catch (error) {
@@ -378,9 +381,10 @@
                     document.getElementById('responseMessage').style.display = 'none';
                     document.getElementById('header1').style.display = 'none';
                     document.getElementById('successModal').classList.add('show');
+                    document.getElementById('otp').classList.remove('error');
                 } else {
                     responseMessage.textContent = 'OTP verification failed. Please try again.';
-                    highlightOtpError();
+                    document.getElementById('otp').classList.add('error');
                 }
             } catch (error) {
                 responseMessage.textContent = 'An error occurred. Please try again.';
@@ -455,12 +459,6 @@
             window.location.href = '/signin';
         }
 
-        // Function to add error class to all OTP inputs
-        function highlightOtpError() {
-            otpInputs.forEach(input => {
-                input.classList.add('error');
-            });
-        }
     </script>
 </body>
 </html>
